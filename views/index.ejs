@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owner Dashboard</title>
     <link rel="stylesheet" href="/styles.css"> <!-- Link to external CSS -->
+    <style>
+        body {
+            background-image: url('https://thumbs.dreamstime.com/b/volvo-fuel-truck-shell-kerosine-refueling-vehicle-driving-apron-eindhoven-airport-netherlands-sep-346555233.jpg?w=768');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        #orders-container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .order-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            color: black;
+        }
+    </style>
 </head>
 <body>
     <h1>Owner Dashboard</h1>
@@ -29,33 +54,20 @@
     <!-- Add JavaScript for handling button clicks -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Add event listener to all "Mark as Delivered" buttons
             document.querySelectorAll('.mark-delivered-btn').forEach(button => {
                 button.addEventListener('click', async () => {
-                    const orderId = button.getAttribute('data-id'); // Get the order ID from the button's data attribute
-
+                    const orderId = button.getAttribute('data-id');
                     try {
-                        // Send a POST request to update the status
                         const response = await fetch(`/update-status/${orderId}`, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                         });
-
                         const result = await response.json();
-
                         if (response.ok) {
-                            // Find the corresponding card and update the status text
                             const card = button.closest('.order-card');
-                            const statusText = card.querySelector('.status-text');
-                            statusText.textContent = result.status; // Update the status text to "Delivered"
-
-                            // Change the card's styling to indicate it's delivered
+                            card.querySelector('.status-text').textContent = result.status;
                             card.classList.remove('pending');
                             card.classList.add('delivered');
-
-                            // Replace the button with "Already Delivered" text
                             button.parentElement.innerHTML = '<span class="already-delivered">Delivered</span>';
                         } else {
                             alert('Failed to update status: ' + result.message);
