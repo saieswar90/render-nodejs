@@ -25,7 +25,7 @@ const orderSchema = new mongoose.Schema({
     address: String,
     fuelType: String,
     litres: Number,
-    phoneNumber: String
+    phoneNumber: String, // Fixed missing comma
     status: String,
 });
 
