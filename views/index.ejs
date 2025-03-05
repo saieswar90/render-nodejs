@@ -9,40 +9,21 @@
 <body>
     <h1>Owner Dashboard</h1>
     <div id="orders-container">
-        <table id="orders-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Phone Number</th>
-                    <th>Address</th>
-                    <th>Fuel Type</th>
-                    <th>Litres</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% orders.forEach(order => { %>
-                    <tr>
-                        <td><%= order.name %></td>
-                        <td><%= order.phoneNumber || 'N/A' %></td>
-                        <td><%= order.address %></td>
-                        <td><%= order.fuelType %></td>
-                        <td><%= order.litres %></td>
-                        <td class="<%= order.status === 'Delivered' ? 'delivered' : 'pending' %>">
-                            <%= order.status %>
-                        </td>
-                        <td>
-                            <% if (order.status !== 'Delivered') { %>
-                                <button class="mark-delivered-btn" data-id="<%= order._id %>">Mark as Delivered</button>
-                            <% } else { %>
-                                <span class="already-delivered">Already Delivered</span>
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
+        <% orders.forEach(order => { %>
+            <div class="order-card <%= order.status === 'Delivered' ? 'delivered' : 'pending' %>" data-id="<%= order._id %>">
+                <h3><%= order.name %></h3>
+                <p><strong>Phone:</strong> <%= order.phoneNumber || 'N/A' %></p>
+                <p><strong>Address:</strong> <%= order.address %></p>
+                <p><strong>Fuel Type:</strong> <%= order.fuelType %></p>
+                <p><strong>Litres:</strong> <%= order.litres %></p>
+                <p><strong>Status:</strong> <%= order.status %></p>
+                <% if (order.status !== 'Delivered') { %>
+                    <button class="mark-delivered-btn" data-id="<%= order._id %>">Mark as Delivered</button>
+                <% } else { %>
+                    <span class="already-delivered">Already Delivered</span>
+                <% } %>
+            </div>
+        <% }) %>
     </div>
 
     <!-- Add JavaScript for handling button clicks -->
@@ -66,6 +47,9 @@
 
                         if (response.ok) {
                             // Update the status text and disable the button
+                            const card = button.closest('.order-card');
+                            card.classList.remove('pending');
+                            card.classList.add('delivered');
                             button.parentElement.innerHTML = '<span class="already-delivered">Already Delivered</span>';
                             alert(result.message); // Show success message
                         } else {
