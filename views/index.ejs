@@ -13,10 +13,10 @@
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Phone Number</th>
                     <th>Address</th>
                     <th>Fuel Type</th>
                     <th>Litres</th>
-                    <th>Phone Number</th> <!-- Add this column -->
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -25,18 +25,16 @@
                 <% orders.forEach(order => { %>
                     <tr>
                         <td><%= order.name %></td>
+                        <td><%= order.phoneNumber || 'N/A' %></td>
                         <td><%= order.address %></td>
                         <td><%= order.fuelType %></td>
                         <td><%= order.litres %></td>
-                        <td><%= order.phoneNumber || 'N/A' %></td> <!-- Display phone number -->
                         <td class="<%= order.status === 'Delivered' ? 'delivered' : 'pending' %>">
                             <%= order.status %>
                         </td>
                         <td>
                             <% if (order.status !== 'Delivered') { %>
-                                <form action="/update-status/<%= order._id %>" method="POST">
-                                    <button type="submit" class="mark-delivered-btn">Mark as Delivered</button>
-                                </form>
+                                <button class="mark-delivered-btn" data-id="<%= order._id %>">Mark as Delivered</button>
                             <% } else { %>
                                 <span class="already-delivered">Already Delivered</span>
                             <% } %>
@@ -46,5 +44,40 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Add JavaScript for handling button clicks -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listener to all "Mark as Delivered" buttons
+            document.querySelectorAll('.mark-delivered-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const orderId = button.getAttribute('data-id'); // Get the order ID from the button's data attribute
+
+                    try {
+                        // Send a POST request to update the status
+                        const response = await fetch(`/update-status/${orderId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            // Update the status text and disable the button
+                            button.parentElement.innerHTML = '<span class="already-delivered">Already Delivered</span>';
+                            alert(result.message); // Show success message
+                        } else {
+                            alert('Failed to update status: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while updating the status.');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
