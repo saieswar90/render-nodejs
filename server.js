@@ -23,16 +23,16 @@ mongoose.connect(MONGO_URI, {
 const orderSchema = new mongoose.Schema({
     name: String,
     address: String,
+    phoneNumber: String,
     fuelType: String,
     litres: Number,
-    phoneNumber: String, // Fixed missing comma
-    status: String,
+    status: { type: String, default: 'Pending' }, // Default status is "Pending"
 });
 
 const Order = mongoose.model('sneha_orders', orderSchema);
 
 // Routes
-// Home route to display orders
+// Home route to display orders (for UI)
 app.get('/', async (req, res) => {
     try {
         const orders = await Order.find({});
@@ -43,15 +43,45 @@ app.get('/', async (req, res) => {
     }
 });
 
+// Endpoint to insert a new order
+app.post('/send-order', async (req, res) => {
+    try {
+        const { name, address, phoneNumber, fuelType, litres } = req.body;
+        const newOrder = new Order({
+            name,
+            address,
+            phoneNumber,
+            fuelType,
+            litres,
+        });
+        await newOrder.save();
+        res.status(201).json({ message: 'Order placed successfully!' });
+    } catch (err) {
+        console.error('Error placing order:', err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// Endpoint to fetch all orders
+app.get('/get-orders', async (req, res) => {
+    try {
+        const orders = await Order.find({});
+        res.status(200).json(orders);
+    } catch (err) {
+        console.error('Error fetching orders:', err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 // Update status to "Delivered"
 app.post('/update-status/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
         await Order.findByIdAndUpdate(orderId, { status: 'Delivered' });
-        res.redirect('/');
+        res.status(200).json({ message: 'Status updated successfully!' });
     } catch (err) {
         console.error('Error updating status:', err);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server Error' });
     }
 });
 
