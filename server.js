@@ -74,14 +74,15 @@ app.get('/get-orders', async (req, res) => {
 });
 
 // Update status to "Delivered"
+// Update status to "Delivered"
 app.post('/update-status/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
         await Order.findByIdAndUpdate(orderId, { status: 'Delivered' });
-        res.status(200).json({ message: 'Status updated successfully!' });
+        res.status(200).json({ message: 'Status updated successfully!', status: 'Delivered' });
     } catch (err) {
         console.error('Error updating status:', err);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Server Error', status: 'Failed' });
     }
 });
 
