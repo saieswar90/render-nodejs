@@ -13,6 +13,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Phone Number</th> <!-- Add this column -->
                     <th>Address</th>
                     <th>Fuel Type</th>
                     <th>Litres</th>
@@ -24,6 +25,7 @@
                 <% orders.forEach(order => { %>
                     <tr>
                         <td><%= order.name %></td>
+                        <td><%= order.phoneNumber || 'N/A' %></td> <!-- Display phone number -->
                         <td><%= order.address %></td>
                         <td><%= order.fuelType %></td>
                         <td><%= order.litres %></td>
