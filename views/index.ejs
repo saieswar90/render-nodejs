@@ -9,83 +9,64 @@
 <body>
     <h1>Owner Dashboard</h1>
     <div id="orders-container">
-        <!-- Orders will be dynamically populated here -->
+        <% orders.forEach(order => { %>
+            <div class="order-card <%= order.status === 'Delivered' ? 'delivered' : 'pending' %>" data-id="<%= order._id %>">
+                <h3><%= order.name %></h3>
+                <p><strong>Phone:</strong> <%= order.phoneNumber || 'N/A' %></p>
+                <p><strong>Address:</strong> <%= order.address %></p>
+                <p><strong>Fuel Type:</strong> <%= order.fuelType %></p>
+                <p><strong>Litres:</strong> <%= order.litres %></p>
+                <p><strong>Status:</strong> <span class="status-text"><%= order.status %></span></p>
+                <% if (order.status !== 'Delivered') { %>
+                    <button class="mark-delivered-btn" data-id="<%= order._id %>">Mark as Delivered</button>
+                <% } else { %>
+                    <span class="already-delivered">Already Delivered</span>
+                <% } %>
+            </div>
+        <% }) %>
     </div>
 
-    <!-- Add JavaScript for fetching and rendering orders -->
+    <!-- Add JavaScript for handling button clicks -->
     <script>
-        // Function to fetch and render orders
-        async function fetchOrders() {
-            try {
-                const response = await fetch('/'); // Fetch orders from the server
-                const orders = await response.json();
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listener to all "Mark as Delivered" buttons
+            document.querySelectorAll('.mark-delivered-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const orderId = button.getAttribute('data-id'); // Get the order ID from the button's data attribute
 
-                const ordersContainer = document.getElementById('orders-container');
-                ordersContainer.innerHTML = ''; // Clear existing orders
+                    try {
+                        // Send a POST request to update the status
+                        const response = await fetch(`/update-status/${orderId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
 
-                // Render each order as a card
-                orders.forEach(order => {
-                    const card = document.createElement('div');
-                    card.className = `order-card ${order.status === 'Delivered' ? 'delivered' : 'pending'}`;
-                    card.setAttribute('data-id', order._id);
+                        const result = await response.json();
 
-                    card.innerHTML = `
-                        <h3>${order.name}</h3>
-                        <p><strong>Phone:</strong> ${order.phoneNumber || 'N/A'}</p>
-                        <p><strong>Address:</strong> ${order.address}</p>
-                        <p><strong>Fuel Type:</strong> ${order.fuelType}</p>
-                        <p><strong>Litres:</strong> ${order.litres}</p>
-                        <p><strong>Status:</strong> <span class="status-text">${order.status}</span></p>
-                        ${order.status !== 'Delivered'
-                            ? `<button class="mark-delivered-btn" data-id="${order._id}">Mark as Delivered</button>`
-                            : '<span class="already-delivered">Already Delivered</span>'
+                        if (response.ok) {
+                            // Find the corresponding card and update the status text
+                            const card = button.closest('.order-card');
+                            const statusText = card.querySelector('.status-text');
+                            statusText.textContent = result.status; // Update the status text to "Delivered"
+
+                            // Change the card's styling to indicate it's delivered
+                            card.classList.remove('pending');
+                            card.classList.add('delivered');
+
+                            // Replace the button with "Already Delivered" text
+                            button.parentElement.innerHTML = '<span class="already-delivered">Already Delivered</span>';
+                        } else {
+                            alert('Failed to update status: ' + result.message);
                         }
-                    `;
-
-                    ordersContainer.appendChild(card);
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while updating the status.');
+                    }
                 });
-
-                // Add event listeners to "Mark as Delivered" buttons
-                document.querySelectorAll('.mark-delivered-btn').forEach(button => {
-                    button.addEventListener('click', async () => {
-                        const orderId = button.getAttribute('data-id');
-
-                        try {
-                            const response = await fetch(`/update-status/${orderId}`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                            });
-
-                            const result = await response.json();
-
-                            if (response.ok) {
-                                const card = button.closest('.order-card');
-                                const statusText = card.querySelector('.status-text');
-                                statusText.textContent = result.status;
-
-                                card.classList.remove('pending');
-                                card.classList.add('delivered');
-
-                                button.parentElement.innerHTML = '<span class="already-delivered">Delivered</span>';
-                            } else {
-                                alert('Failed to update status: ' + result.message);
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('An error occurred while updating the status.');
-                        }
-                    });
-                });
-            } catch (error) {
-                console.error('Error fetching orders:', error);
-            }
-        }
-
-        // Poll the server every 5 seconds to fetch new orders
-        setInterval(fetchOrders, 5000); // Fetch orders every 5 seconds
-
-        // Initial fetch when the page loads
-        document.addEventListener('DOMContentLoaded', fetchOrders);
+            });
+        });
     </script>
 </body>
 </html>
