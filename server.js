@@ -25,6 +25,7 @@ const orderSchema = new mongoose.Schema({
     address: String,
     fuelType: String,
     litres: Number,
+    phoneNumber: String
     status: String,
 });
 
