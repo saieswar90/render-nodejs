@@ -16,7 +16,7 @@
                 <p><strong>Address:</strong> <%= order.address %></p>
                 <p><strong>Fuel Type:</strong> <%= order.fuelType %></p>
                 <p><strong>Litres:</strong> <%= order.litres %></p>
-                <p><strong>Status:</strong> <%= order.status %></p>
+                <p><strong>Status:</strong> <span class="status-text"><%= order.status %></span></p>
                 <% if (order.status !== 'Delivered') { %>
                     <button class="mark-delivered-btn" data-id="<%= order._id %>">Mark as Delivered</button>
                 <% } else { %>
@@ -46,12 +46,17 @@
                         const result = await response.json();
 
                         if (response.ok) {
-                            // Update the status text and disable the button
+                            // Find the corresponding card and update the status text
                             const card = button.closest('.order-card');
+                            const statusText = card.querySelector('.status-text');
+                            statusText.textContent = result.status; // Update the status text to "Delivered"
+
+                            // Change the card's styling to indicate it's delivered
                             card.classList.remove('pending');
                             card.classList.add('delivered');
+
+                            // Replace the button with "Already Delivered" text
                             button.parentElement.innerHTML = '<span class="already-delivered">Already Delivered</span>';
-                            alert(result.message); // Show success message
                         } else {
                             alert('Failed to update status: ' + result.message);
                         }
